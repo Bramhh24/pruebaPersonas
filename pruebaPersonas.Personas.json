@@ -1,0 +1,55 @@
+[{
+  "_id": {
+    "$oid": "67491e9f61635a73bb1a01ae"
+  },
+  "nombres": "Hector Abraham",
+  "apellidos": "Posada Reyna",
+  "edad": 26,
+  "genero": "Hombre",
+  "status": true,
+  "_class": "com.bramh.pruebaPersonas.Models.Persona"
+},
+{
+  "_id": {
+    "$oid": "67491fb9d506545b95287344"
+  },
+  "nombres": "Luis",
+  "apellidos": "Reyes",
+  "edad": 39,
+  "genero": "Hombre",
+  "status": true,
+  "_class": "com.bramh.pruebaPersonas.Models.Persona"
+},
+{
+  "_id": {
+    "$oid": "67492010d506545b95287345"
+  },
+  "nombres": "Rafa",
+  "apellidos": "Ramos",
+  "edad": 26,
+  "genero": "Hombre",
+  "status": true,
+  "_class": "com.bramh.pruebaPersonas.Models.Persona"
+},
+{
+  "_id": {
+    "$oid": "674922aeac26d63d4c43925d"
+  },
+  "nombres": "Gabriel",
+  "apellidos": "Hernandez",
+  "edad": 32,
+  "genero": "Hombre",
+  "status": true,
+  "_class": "com.bramh.pruebaPersonas.Models.Persona"
+},
+{
+  "_id": {
+    "$oid": "674bfb15af5a1e36e3664c11"
+  },
+  "nombres": "Raul",
+  "apellidos": "Lopez",
+  "edad": 38,
+  "genero": "Hombre",
+  "status": true,
+  "_class": "com.bramh.pruebaPersonas.Models.Persona"
+}]
