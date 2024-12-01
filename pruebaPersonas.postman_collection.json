@@ -1,0 +1,136 @@
+{
+	"info": {
+		"_postman_id": "dece4898-94fb-4011-8d1b-a12fde63c08a",
+		"name": "pruebaPersonas",
+		"description": "API de pruebaPersonas",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23335757"
+	},
+	"item": [
+		{
+			"name": "ObtenerTodasLasPersonas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/v1/persona/all",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"persona",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AgergarPersona",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombres\": \"Gabriel\",\n    \"apellidos\": \"Hernandez\",\n    \"edad\": 32,\n    \"genero\": \"Hombre\",\n    \"status\": \"Activo\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/v1/persona/addPersona",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"persona",
+						"addPersona"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ObtenerPersonaPorId",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/v1/persona/67491e9f61635a73bb1a01ae",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"persona",
+						"67491e9f61635a73bb1a01ae"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ActualizarPersona",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombres\": \"Hector Abraham\",\n    \"apellidos\": \"Posada Reyna\",\n    \"edad\": 26,\n    \"genero\": \"Hombre\",\n    \"status\": \"true\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/v1/persona/update/67491e9f61635a73bb1a01ae",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"persona",
+						"update",
+						"67491e9f61635a73bb1a01ae"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BorrarPersona",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/v1/persona/delete/{personaId}",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"persona",
+						"delete",
+						"{personaId}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
