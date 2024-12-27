@@ -15,6 +15,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import reactor.core.CoreSubscriber;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,7 +38,7 @@ class PersonaServiceImpTest {
     private CosaClient cosaClientMock;
     private Persona persona;
     private Optional<Persona> optPersona;
-    private List<Persona> personas = new ArrayList<>();
+    private Flux<Persona> personas;
     private List<Cosa> cosas = new ArrayList<>();
 
     @BeforeEach
@@ -50,7 +53,10 @@ class PersonaServiceImpTest {
         persona.setGenero("Test");
         persona.setStatus(true);
 
-        personas.add(persona);
+        List<Persona> listaPersonas = new ArrayList<Persona>();
+        listaPersonas.add(persona);
+        personas = Flux.fromIterable(listaPersonas);
+
         optPersona = Optional.of(persona);
 
         Cosa cosa = new Cosa();
@@ -63,8 +69,8 @@ class PersonaServiceImpTest {
         cosas.add(cosa);
 
         Mockito.when((personaRepository.findAll())).thenReturn(personas);
-        Mockito.when(personaRepository.save(any(Persona.class))).thenReturn(persona);
-        Mockito.when((personaRepository.findById(""))).thenReturn(optPersona);
+        Mockito.when(personaRepository.save(any(Persona.class))).thenReturn(Mono.just(persona));
+        Mockito.when((personaRepository.findById(""))).thenReturn(Mono.just(persona));
         Mockito.when(cosaClientMock.obtenerCosasPorPropietario("")).thenReturn(cosas);
     }
 

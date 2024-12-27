@@ -17,6 +17,8 @@ import com.bramh.pruebaPersonas.Models.Persona;
 import com.bramh.pruebaPersonas.Repository.PersonaRepository;
 import com.bramh.pruebaPersonas.Utils.ApiResponse;
 import com.bramh.pruebaPersonas.Utils.Message;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 //import reactor.core.publisher.Flux;
 
@@ -28,60 +30,79 @@ public class PersonaServiceImp {
     @Autowired
     private CosaClient cosaClient;
 
-    public List<PersonaDTO> getAllPersonas(){
+    public Flux<PersonaDTO> getAllPersonas(){
 
-        List<Persona> personas = personaRepository.findAll();
+        Flux<Persona> personas = personaRepository.findAll();
 
-        return personas.stream().map(persona -> {
+        return personas.map(persona -> {
             List<Cosa> cosas = cosaClient.obtenerCosasPorPropietario(persona.getIdPersona());
             return PersonaDTO.fromEntity(persona, cosas);
-        }).collect(Collectors.toList());
+        });
+//        return personas.stream().map(persona -> {
+//            List<Cosa> cosas = cosaClient.obtenerCosasPorPropietario(persona.getIdPersona());
+//            return PersonaDTO.fromEntity(persona, cosas);
+//        }).collect(Collectors.toList());
     }
 
 
-    public ApiResponse addPersona(Persona persona){
+    public Mono<ApiResponse> addPersona(Persona persona){
 
-        this.personaRepository.save(persona);
-
-        return new ApiResponse(Message.PERSONA_SAVE_SUCCESSFULLY, HttpStatus.CREATED.value(), HttpStatus.CREATED, LocalDateTime.now());
+        return this.personaRepository.save(persona)
+                .map(p ->
+                        new ApiResponse(
+                                Message.PERSONA_SAVE_SUCCESSFULLY, HttpStatus.CREATED.value(),
+                                HttpStatus.CREATED, LocalDateTime.now())
+                );
     }
 
-    public ApiResponse updatePersona(String id, Persona persona){
+    public Mono<ApiResponse> updatePersona(String id, Persona persona) {
+        return findPersonaByIdOrThrow(id) // Buscar Persona existente (reactiva)
+                .flatMap(existingPersona -> { // Mapear el resultado reactivo
+                    // Actualizar datos
+                    existingPersona.setNombres(persona.getNombres());
+                    existingPersona.setApellidos(persona.getApellidos());
+                    existingPersona.setEdad(persona.getEdad());
+                    existingPersona.setGenero(persona.getGenero());
+                    existingPersona.setStatus(persona.getStatus());
 
-        Persona existingPersona = findPersonaByIdOrThrow(id);
-
-        existingPersona.setNombres(persona.getNombres());
-        existingPersona.setApellidos(persona.getApellidos());
-        existingPersona.setEdad(persona.getEdad());
-        existingPersona.setGenero(persona.getGenero());
-        existingPersona.setStatus(persona.getStatus());
-
-        personaRepository.save(existingPersona);
-
-        return new ApiResponse(Message.PERSONA_UPDATE_SUCCESSFULLY, HttpStatus.OK.value(),
-                HttpStatus.OK, LocalDateTime.now());
+                    // Guardar en el repositorio (reactivo)
+                    return personaRepository.save(existingPersona);
+                })
+                .map(updatedPersona -> // Respuesta después de actualizar
+                        new ApiResponse(
+                                Message.PERSONA_UPDATE_SUCCESSFULLY,
+                                HttpStatus.OK.value(),
+                                HttpStatus.OK,
+                                LocalDateTime.now()
+                        )
+                );
     }
 
-    public PersonaDTO findById(String id){
+    public Mono<PersonaDTO> findById(String id){
 
-        Persona persona = findPersonaByIdOrThrow(id);
-        List<Cosa> cosas = cosaClient.obtenerCosasPorPropietario(persona.getIdPersona());
-        return PersonaDTO.fromEntity(persona, cosas);
+        Mono<Persona> persona = findPersonaByIdOrThrow(id);
+
+        return persona.map(p -> {
+            List<Cosa> cosas = cosaClient.obtenerCosasPorPropietario(p.getIdPersona());
+            return PersonaDTO.fromEntity(p, cosas);
+        });
+
     }
 
-    public ApiResponse deletePersona(String id){
+    public Mono<ApiResponse> deletePersona(String id){
 
-        Persona persona = findPersonaByIdOrThrow(id);
-        personaRepository.delete(persona);
-
-        return new ApiResponse(Message.PERSONA_DELETE_SUCCESSFULLY, HttpStatus.NO_CONTENT.value(),
-                HttpStatus.NO_CONTENT, LocalDateTime.now());
+        Mono<Persona> persona = findPersonaByIdOrThrow(id);
+        return persona.map(p -> {
+            personaRepository.delete(p);
+            return new ApiResponse(Message.PERSONA_DELETE_SUCCESSFULLY, HttpStatus.NO_CONTENT.value(),
+                    HttpStatus.NO_CONTENT, LocalDateTime.now());
+        });
     }
 
-    private Persona findPersonaByIdOrThrow(String id) {
+    private Mono<Persona> findPersonaByIdOrThrow(String id) {
         return personaRepository.findById(id)
-                .orElseThrow(() -> new PersonaNotFoundException(
-                        Message.PERSONA_NOT_FOUND, HttpStatus.NOT_FOUND.value(),
-                        HttpStatus.NOT_FOUND, LocalDateTime.now()));
+                .switchIfEmpty(Mono.error(new PersonaNotFoundException(
+                        Message.PERSONA_NOT_FOUND, HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, LocalDateTime.now()
+                )));
     }
 }
