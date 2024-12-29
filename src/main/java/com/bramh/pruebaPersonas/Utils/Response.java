@@ -1,6 +1,7 @@
 package com.bramh.pruebaPersonas.Utils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
@@ -20,4 +21,5 @@ public class Response {
     private HttpStatus status;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
+    private List<String> errors;
 }

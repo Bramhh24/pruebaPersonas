@@ -1,9 +1,16 @@
 package com.bramh.pruebaPersonas.Controllers;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.bramh.pruebaPersonas.Models.PersonaDTO;
+import com.bramh.pruebaPersonas.Utils.ApiResponse;
+import com.bramh.pruebaPersonas.Utils.Message;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bramh.pruebaPersonas.Models.Persona;
 import com.bramh.pruebaPersonas.Service.PersonaServiceImp;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -48,7 +56,7 @@ public class PersonaController {
     }
 
     @PostMapping("/addPersona")
-    public Mono<ResponseEntity<?>> addPersona(@RequestBody Persona persona){
+    public Mono<ResponseEntity<ApiResponse>> addPersona(@Valid @RequestBody Persona persona){
 
 //        this.personaServiceImp.addPersona(persona);
 //
@@ -60,11 +68,13 @@ public class PersonaController {
 //
 //        return ResponseEntity.created(location).body(persona);
 
-        return this.personaServiceImp.addPersona(persona).map(apiResponse -> ResponseEntity
-                .created(URI.create("/api/v1/persona/".concat(persona.getIdPersona())))
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(apiResponse)
-        );
+            return this.personaServiceImp.addPersona(persona)
+                    .map(apiResponse -> ResponseEntity
+                        .created(URI.create("/api/v1/persona/".concat(persona.getIdPersona())))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(apiResponse)
+            );
+
     }
 
     @PutMapping("/update/{personaId}")

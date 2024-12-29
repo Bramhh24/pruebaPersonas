@@ -1,15 +1,16 @@
 package com.bramh.pruebaPersonas.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.bramh.pruebaPersonas.Models.Cosa;
 import com.bramh.pruebaPersonas.Models.PersonaDTO;
 import com.bramh.pruebaPersonas.Repository.CosaClient;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.bramh.pruebaPersonas.Exception.PersonaNotFoundException;
@@ -17,6 +18,7 @@ import com.bramh.pruebaPersonas.Models.Persona;
 import com.bramh.pruebaPersonas.Repository.PersonaRepository;
 import com.bramh.pruebaPersonas.Utils.ApiResponse;
 import com.bramh.pruebaPersonas.Utils.Message;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -51,12 +53,12 @@ public class PersonaServiceImp {
                 .map(p ->
                         new ApiResponse(
                                 Message.PERSONA_SAVE_SUCCESSFULLY, HttpStatus.CREATED.value(),
-                                HttpStatus.CREATED, LocalDateTime.now())
+                                HttpStatus.CREATED, LocalDateTime.now(), new ArrayList<String>())
                 );
     }
 
     public Mono<ApiResponse> updatePersona(String id, Persona persona) {
-        return findPersonaByIdOrThrow(id) // Buscar Persona existente (reactiva)
+        return personaRepository.findById(id) // Buscar Persona existente (reactiva)
                 .flatMap(existingPersona -> { // Mapear el resultado reactivo
                     // Actualizar datos
                     existingPersona.setNombres(persona.getNombres());
@@ -73,14 +75,15 @@ public class PersonaServiceImp {
                                 Message.PERSONA_UPDATE_SUCCESSFULLY,
                                 HttpStatus.OK.value(),
                                 HttpStatus.OK,
-                                LocalDateTime.now()
+                                LocalDateTime.now(),
+                                new ArrayList<String>()
                         )
                 );
     }
 
     public Mono<PersonaDTO> findById(String id){
 
-        Mono<Persona> persona = findPersonaByIdOrThrow(id);
+        Mono<Persona> persona = personaRepository.findById(id);
 
         return persona.map(p -> {
             List<Cosa> cosas = cosaClient.obtenerCosasPorPropietario(p.getIdPersona());
@@ -91,18 +94,14 @@ public class PersonaServiceImp {
 
     public Mono<ApiResponse> deletePersona(String id){
 
-        Mono<Persona> persona = findPersonaByIdOrThrow(id);
-        return persona.map(p -> {
-            personaRepository.delete(p);
-            return new ApiResponse(Message.PERSONA_DELETE_SUCCESSFULLY, HttpStatus.NO_CONTENT.value(),
-                    HttpStatus.NO_CONTENT, LocalDateTime.now());
-        });
+        Mono<Persona> persona = personaRepository.findById(id);
+        return persona.flatMap(p -> {
+            return personaRepository.delete(p)
+                    .then(Mono.just(new ApiResponse(Message.PERSONA_DELETE_SUCCESSFULLY, HttpStatus.NO_CONTENT.value(),
+                            HttpStatus.NO_CONTENT, LocalDateTime.now(), new ArrayList<String>())));
+
+        }).defaultIfEmpty(new ApiResponse(Message.PERSONA_NOT_FOUND, HttpStatus.NO_CONTENT.value(),
+                HttpStatus.NO_CONTENT, LocalDateTime.now(), new ArrayList<String>()));
     }
 
-    private Mono<Persona> findPersonaByIdOrThrow(String id) {
-        return personaRepository.findById(id)
-                .switchIfEmpty(Mono.error(new PersonaNotFoundException(
-                        Message.PERSONA_NOT_FOUND, HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, LocalDateTime.now()
-                )));
-    }
 }
